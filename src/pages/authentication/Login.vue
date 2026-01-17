@@ -117,8 +117,8 @@ export default {
       
       // Handle success
       if (result.success) {
-        // Redirect to dashboard or home
-        this.$router.push('/dashboard')
+        //  home
+        this.$router.push('/home')
       }
       // Error is already set in the store and will show in the alert
     },
