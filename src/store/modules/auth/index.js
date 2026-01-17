@@ -1,99 +1,104 @@
-import axios from 'axios'
-import config from '@/config'
+import axios from "axios";
+import config from "@/config";
+
+function safeParse(key) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
+  }
+}
 
 export default {
   namespaced: true,
-  
+
   state: {
-    user: JSON.parse(localStorage.getItem(config.auth.userKey)) || null,
-    token: localStorage.getItem(config.auth.tokenKey) || null,
+    user: safeParse(config.auth.userKey), // ✅ SAFE
+    token: localStorage.getItem(config.auth.tokenKey), // ✅ NO JSON.parse
     isAuthenticated: !!localStorage.getItem(config.auth.tokenKey),
     loading: false,
-    error: null
+    error: null,
   },
-  
+
   getters: {
-    isAuthenticated: state => state.isAuthenticated,
-    currentUser: state => state.user,
-    isLoading: state => state.loading,
-    authError: state => state.error
+    isAuthenticated: (state) => state.isAuthenticated,
+    currentUser: (state) => state.user,
+    isLoading: (state) => state.loading,
+    authError: (state) => state.error,
   },
-  
+
   mutations: {
     SET_LOADING(state, loading) {
-      state.loading = loading
+      state.loading = loading;
     },
-    
+
     SET_USER(state, user) {
-      state.user = user
-      state.isAuthenticated = true
-      localStorage.setItem(config.auth.userKey, JSON.stringify(user))
+      state.user = user;
+      state.isAuthenticated = true;
+      localStorage.setItem(config.auth.userKey, JSON.stringify(user));
     },
-    
+
     SET_TOKEN(state, token) {
-      state.token = token
-      state.isAuthenticated = true
-      localStorage.setItem(config.auth.tokenKey, token)
-      axios.defaults.headers.common['Authorization'] = `${config.auth.tokenPrefix} ${token}`
+      state.token = token;
+      state.isAuthenticated = true;
+      localStorage.setItem(config.auth.tokenKey, token); // ✅ string only
+      axios.defaults.headers.common.Authorization = `${config.auth.tokenPrefix} ${token}`;
     },
-    
+
     SET_ERROR(state, error) {
-      state.error = error
+      state.error = error;
     },
-    
+
     CLEAR_ERROR(state) {
-      state.error = null
+      state.error = null;
     },
-    
+
     LOGOUT(state) {
-      state.user = null
-      state.token = null
-      state.isAuthenticated = false
-      localStorage.removeItem(config.auth.tokenKey)
-      localStorage.removeItem(config.auth.userKey)
-      delete axios.defaults.headers.common['Authorization']
-    }
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem(config.auth.tokenKey);
+      localStorage.removeItem(config.auth.userKey);
+      delete axios.defaults.headers.common.Authorization;
+    },
   },
-  
+
   actions: {
-    // Login action
     async login({ commit }, credentials) {
-      commit('SET_LOADING', true)
-      commit('CLEAR_ERROR')
-      
+      commit("SET_LOADING", true);
+      commit("CLEAR_ERROR");
+
       try {
-        // ✅ FIXED: Correct template literal syntax
-        const response = await axios.post(`${config.api.baseUrl}${config.api.endpoints.login}`, {
-          email: credentials.email,
-          password: credentials.password
-        })
-        
-        const { token, user } = response.data
-        
-        commit('SET_TOKEN', token)
-        commit('SET_USER', user)
-        commit('SET_LOADING', false)
-        
-        return { success: true }
-        
+        const response = await axios.post(
+          `${config.api.baseUrl}${config.api.endpoints.login}`,
+          credentials,
+        );
+
+        const token = response.data?.data?.access_token;
+
+        if (!token) {
+          throw new Error("Token not found in response");
+        }
+
+        commit("SET_TOKEN", token);
+        commit("SET_LOADING", false);
+
+        return { success: true };
       } catch (error) {
-        const message = error.response?.data?.message || 'Login failed'
-        commit('SET_ERROR', message)
-        commit('SET_LOADING', false)
-        
-        return { success: false, message }
+        const message =
+          error.response?.data?.message || error.message || "Login failed";
+
+        commit("SET_ERROR", message);
+        commit("SET_LOADING", false);
+
+        return { success: false, message };
       }
     },
-    
-    // Logout action
+
     logout({ commit }) {
-      commit('LOGOUT')
-      commit('CLEAR_ERROR')
+      commit("LOGOUT");
+      commit("CLEAR_ERROR");
     },
-    
-    // Clear error
-    clearError({ commit }) {
-      commit('CLEAR_ERROR')
-    }
-  }
-}
+  },
+};

@@ -7,6 +7,7 @@
       <v-btn text to="/home">Home</v-btn>
       <v-btn text to="/about">About</v-btn>
       <v-btn text to="/profile">Profile</v-btn>
+      <v-btn text @click="handleLogout">Logout</v-btn>
     </v-app-bar>
 
     <!-- Navigation Drawer + Content -->
@@ -28,6 +29,13 @@
 <script>
 export default {
   name: "AuthLayoutPage",
+
+  methods: {
+    handleLogout() {
+      this.$store.dispatch("auth/logout");
+      this.$router.push("/");
+    },
+  },
 };
 </script>
 
