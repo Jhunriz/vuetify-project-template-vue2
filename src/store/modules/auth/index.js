@@ -14,8 +14,8 @@ export default {
   namespaced: true,
 
   state: {
-    user: safeParse(config.auth.userKey), // ✅ SAFE
-    token: localStorage.getItem(config.auth.tokenKey), // ✅ NO JSON.parse
+    user: safeParse(config.auth.userKey),
+    token: localStorage.getItem(config.auth.tokenKey),
     isAuthenticated: !!localStorage.getItem(config.auth.tokenKey),
     loading: false,
     error: null,
