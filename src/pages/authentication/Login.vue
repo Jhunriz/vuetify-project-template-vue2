@@ -62,8 +62,17 @@
         </v-btn>
       </v-form>
     </v-card-text>
+    <!-- <v-autocomplete
+      v-model="var1"
+      :items="var2"
+      outlined
+      dense
+    >
+
+    </v-autocomplete> -->
     
     <v-card-actions class="justify-center mt-6 gap-4">
+      <!-- <v-btn @click="testing()">Testing</v-btn> -->
       <v-btn text small @click="goToForgotPassword">Forgot Password?</v-btn>
       <v-btn text small @click="goToSignUp">Sign Up</v-btn>
     </v-card-actions>
@@ -73,6 +82,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+
 export default {
   name: "LoginPage",
   
@@ -80,6 +90,11 @@ export default {
     return {
       email: '',
       password: '',
+      var1: 0,
+      var2: [
+        {text: 'testing', value: 1},
+        {text: 'testing2' , value: 2}
+      ],
       
       // Validation rules
       emailRules: [
@@ -100,6 +115,10 @@ export default {
   methods: {
     ...mapActions('auth', ['login', 'clearError']),
     
+    // testing(){
+    //   const data = axios.get('http://127.0.0.1:8000/api/user/test');
+    //   console.log(data);
+    // },
     async handleLogin() {
       // Validate form
       if (!this.$refs.form.validate()) {
